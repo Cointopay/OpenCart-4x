@@ -6,7 +6,7 @@ Please follow the Opencart 4.0.x Cointopay Plugin install instructions mentioned
 
 ## *********** HOW TO INSTALL IN OPENCART 4 ***********
 
-1:- Download as zip file
+1:- Download <a download href="https://github.com/Cointopay/OpenCart-4x/blob/main/cointopay.ocmod.zip">cointopay.ocmod.zip</a> file
 
 2:- Palace this zip file in root directory of your Opencart 4 project
 
