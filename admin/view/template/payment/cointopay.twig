@@ -15,11 +15,6 @@
     </div>
     <div class="container-fluid">
 		<div class="alert alert-info"><i class="fa-solid fa-circle-exclamation"></i> {{ text_description }}</div>
-			{% if error.error_warning %}
-				<div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> {{ error.error_warning }}
-					<button type="button" class="close" data-dismiss="alert">&times;</button>
-				</div>
-			{% endif %}
 			<div class="card">
 				<div class="card-header"><i class="fa-solid fa-pencil"></i> {{ text_edit }}</div>
 				<div class="card-body">
@@ -36,7 +31,7 @@
 						<div class="row mb-3 required">
 							<label class="col-sm-2 col-form-label" for="entry-securitycode"><span data-toggle="tooltip" title="{{ help_api_key_hint }}">{{ entry_securitycode }}</span></label>
 							<div class="col-sm-10">
-								<input type="text" name="payment_cointopay_securitycode" value="{{ cointopay_securitycode }}" placeholder="{{ entry_securitycode }}" id="cointopay_securitycode" class="form-control"/>
+								<input type="text" name="payment_cointopay_securitycode" value="{{ cointopay_securitycode }}" placeholder="{{ entry_securitycode }}" id="cointopay_securitycode" class="form-control" onchange="getMerchantCoinBySecretCode(this.value);"/>
 								{% if error_api_key %}
 									<div class="text-danger">{{ error_api_key }}</div>
 								{% endif %}
@@ -184,21 +179,53 @@
     </div>
 </div>
 <script type="text/javascript">
-	{% if cointopay_merchantID is not empty  and  cointopay_crypto_coin is empty %}
-		$(document).ready(function(){
-			getMerchantCoin('{{ cointopay_merchantID }}');
-		});
-	{% endif %}
-	function getMerchantCoin(merchantId)
-	{
-		$.ajax({
-			url:'index.php?route=extension/cointopay/payment/cointopay|getMerchantCoinsByAjax&user_token={{ user_token }}',
-			type:'post',
-			data:{merchantId:merchantId},
-			success:function(res){
-				$('#cointopay_crypto_coin').html(res);
-			}
-		});
-	}
+
+{% if cointopay_merchantID is not empty and cointopay_crypto_coin is empty %}
+$(document).ready(function () {
+
+    // Initial load
+    getMerchantCoin('{{ cointopay_merchantID }}');
+
+});
+{% endif %}
+
+function getMerchantCoin(merchantId) {
+    let secretCode  = $("#cointopay_securitycode").val();
+    $.ajax({
+        url: 'index.php?route=extension/cointopay/payment/cointopay|getMerchantCoinsByAjax&user_token={{ user_token }}',
+        type: 'post',
+        data: {
+            merchantId: merchantId,
+            secret_code: secretCode
+        },
+        success: function (res) {
+            $('#cointopay_crypto_coin').html(res);
+        },
+        error: function (xhr) {
+            console.log("AJAX ERROR:", xhr.responseText);
+        }
+    });
+
+}
+function getMerchantCoinBySecretCode(secretCode) {
+{% if cointopay_merchantID is not empty and cointopay_crypto_coin is empty %}
+    let merchantId  = $("#cointopay_merchantID").val();
+    $.ajax({
+        url: 'index.php?route=extension/cointopay/payment/cointopay|getMerchantCoinsByAjax&user_token={{ user_token }}',
+        type: 'post',
+        data: {
+            merchantId: merchantId,
+            secret_code: secretCode
+        },
+        success: function (res) {
+            $('#cointopay_crypto_coin').html(res);
+        },
+        error: function (xhr) {
+            console.log("AJAX ERROR:", xhr.responseText);
+        }
+    });
+{% endif %}
+}
+
 </script>
 {{ footer }}

@@ -231,13 +231,49 @@ class Cointopay extends \Opencart\System\Engine\Controller
 
 	public function getMerchantCoinsByAjax(): void
 	{
-		if ($this->request->post['merchantId']) {
+		/*if ($this->request->post['merchantId']) {
 			$option = '<option value="">Select Default Coin</option>';
 			$arr = $this->getMerchantCoins($this->request->post['merchantId']);
 			foreach ($arr as $key => $value) {
 				$option .= '<option value="' . $key . '">' . $value . '</option>';
 			}
 			echo $option;
+		}*/
+		if (isset($this->request->post["merchantId"]) && !empty($this->request->post['merchantId'])) {
+			$merchant = $this->request->post["merchantId"];
+			$secretCode = $this->request->post["secret_code"];
+			$url = 'https:///app.cointopay.com/MerchantAPI?MerchantID=' . $merchant . '&SecurityCode=' . $secretCode . '&output=json&Checkout=true&Amount=1&CustomerReferenceNr=test&testmerchant';
+			$curl = curl_init();
+			curl_setopt_array($curl, array(
+				CURLOPT_RETURNTRANSFER => 1,
+				CURLOPT_URL => $url,
+			));
+			$response = curl_exec($curl);
+
+			$http_status = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+			curl_close($curl);
+
+			if ($http_status === 200) {
+				if ($response == '"testmerchant success"') {
+					$option = '<option value="">Select Default Coin</option>';
+					$resp = $this->getMerchantCoins($this->request->post['merchantId']);
+					if (is_array($resp)) {
+						foreach ($resp as $key => $value) {
+							$option .= '<option value="' . $key . '">' . $value . '</option>';
+						}
+						echo $option;
+					} else {
+						$option = '<option value="">' . $resp . '</option>';
+						echo $option;
+					}
+				} else {
+					$option = '<option value="">' . $response . '</option>';
+						echo $option;
+				}
+			} else {
+				$option = '<option value="">' . $response . '</option>';
+						echo $option;
+			}
 		}
 	}
 
