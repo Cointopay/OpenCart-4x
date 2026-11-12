@@ -1,48 +1,36 @@
 <?php
-namespace Opencart\Catalog\Model\Extension\Cointopay\Payment;
+class ModelExtensionPaymentCoinToPay extends Model {
+	public function getMethod($address, $total) {
+		$this->load->language('extension/payment/cointopay');
 
-class Cointopay extends \Opencart\System\Engine\Model
-{
-	public function getMethods(array $address): array
-	{
-		$this->load->language('extension/cointopay/payment/cointopay');
+//		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "zone_to_geo_zone WHERE geo_zone_id = '" . (int)$this->config->get('payza_geo_zone_id') . "' AND country_id = '" . (int)$address['country_id'] . "' AND (zone_id = '" . (int)$address['zone_id'] . "' OR zone_id = '0')");
+//
+//		if ($this->config->get('payza_total') > 0 && $this->config->get('payza_total') > $total) {
+//			$status = false;
+//		} elseif (!$this->config->get('payza_geo_zone_id')) {
+//			$status = true;
+//		} elseif ($query->num_rows) {
+//			$status = true;
+//		} else {
+//			$status = false;
+//		}
 
-		if (!$this->config->get('config_checkout_payment_address')) {
-			$status = true;
-		} elseif (!$this->config->get('payment_cointopay_geo_zone_id')) {
-			$status = true;
-		} else {
-			$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "zone_to_geo_zone` WHERE `geo_zone_id` = '" . (int) $this->config->get('payment_cointopay_geo_zone_id') . "' AND `country_id` = '" . (int) $address['country_id'] . "' AND (`zone_id` = '" . (int) $address['zone_id'] . "' OR `zone_id` = '0')");
+		$method_data = array();
 
-			if ($query->num_rows) {
-				$status = true;
-			} else {
-				$status = false;
-			}
-		}
-
-		$method_data = [];
-
-		if ($status) {
-			$option_data['cointopay'] = [
-				'code' => 'cointopay.cointopay',
-				'name' => $this->config->get('payment_cointopay_display_name')
-			];
-
+		//if ($status) {
 			$method_data = array(
-				'code' => 'cointopay',
-				'name' => $this->config->get('payment_cointopay_display_name'),
-				'option' => $option_data,
+				'code'       => 'cointopay',
+				'title'      => $this->config->get('payment_cointopay_display_name'),
+				'terms'      => '',
 				'sort_order' => $this->config->get('payment_cointopay_sort_order')
 			);
-		}
+		//}
 
 		return $method_data;
 	}
 
-	public function confirm($order_id, $order_status_id, $comment = '', $notify = false)
-	{
-		$this->load->model('checkout/order');
+		public function confirm($order_id, $order_status_id, $comment = '', $notify = false) {
+                $this->load->model('checkout/order');
 		$order_info = $this->model_checkout_order->getOrder($order_id);
 
 		if ($order_info && $order_info['order_status_id']) {
@@ -78,44 +66,42 @@ class Cointopay extends \Opencart\System\Engine\Model
 
 			if ($status) {
 				$order_status_id = $this->config->get('config_order_status_id');
-			}
+			}		
 
-			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int) $order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int) $order_id . "'");
+			$this->db->query("UPDATE `" . DB_PREFIX . "order` SET order_status_id = '" . (int)$order_status_id . "', date_modified = NOW() WHERE order_id = '" . (int)$order_id . "'");
 
-			$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int) $order_id . "', order_status_id = '" . (int) $order_status_id . "', notify = '1', comment = '" . $this->db->escape(($comment && $notify) ? $comment : '') . "', date_added = NOW()");
+			$this->db->query("INSERT INTO " . DB_PREFIX . "order_history SET order_id = '" . (int)$order_id . "', order_status_id = '" . (int)$order_status_id . "', notify = '1', comment = '" . $this->db->escape(($comment && $notify) ? $comment : '') . "', date_added = NOW()");
 
-			$order_product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int) $order_id . "'");
+			$order_product_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_product WHERE order_id = '" . (int)$order_id . "'");
 
 			foreach ($order_product_query->rows as $order_product) {
-				$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (int) $order_product['quantity'] . ") WHERE product_id = '" . (int) $order_product['product_id'] . "' AND subtract = '1'");
+				$this->db->query("UPDATE " . DB_PREFIX . "product SET quantity = (quantity - " . (int)$order_product['quantity'] . ") WHERE product_id = '" . (int)$order_product['product_id'] . "' AND subtract = '1'");
 
-				$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int) $order_id . "' AND order_product_id = '" . (int) $order_product['order_product_id'] . "'");
+				$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id = '" . (int)$order_product['order_product_id'] . "'");
 
 				foreach ($order_option_query->rows as $option) {
-					$this->db->query("UPDATE " . DB_PREFIX . "product_option_value SET quantity = (quantity - " . (int) $order_product['quantity'] . ") WHERE product_option_value_id = '" . (int) $option['product_option_value_id'] . "' AND subtract = '1'");
+					$this->db->query("UPDATE " . DB_PREFIX . "product_option_value SET quantity = (quantity - " . (int)$order_product['quantity'] . ") WHERE product_option_value_id = '" . (int)$option['product_option_value_id'] . "' AND subtract = '1'");
 				}
 			}
 
-			if (!isset($passArray) || empty($passArray)) {
-				$passArray = null;
-			}
-			$this->openbay->orderNew((int) $order_id);
+			if(!isset($passArray) || empty($passArray)){ $passArray = null; }
+			$this->openbay->orderNew((int)$order_id);
 
 			$this->cache->delete('product');
 
 			// Downloads
-			$order_download_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_download WHERE order_id = '" . (int) $order_id . "'");
+			$order_download_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_download WHERE order_id = '" . (int)$order_id . "'");
 
 			// Gift Voucher
 			$this->load->model('checkout/voucher');
 
-			$order_voucher_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_voucher WHERE order_id = '" . (int) $order_id . "'");
+			$order_voucher_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_voucher WHERE order_id = '" . (int)$order_id . "'");
 
 			foreach ($order_voucher_query->rows as $order_voucher) {
 				$voucher_id = $this->model_checkout_voucher->addVoucher($order_id, $order_voucher);
 
-				$this->db->query("UPDATE " . DB_PREFIX . "order_voucher SET voucher_id = '" . (int) $voucher_id . "' WHERE order_voucher_id = '" . (int) $order_voucher['order_voucher_id'] . "'");
-			}
+				$this->db->query("UPDATE " . DB_PREFIX . "order_voucher SET voucher_id = '" . (int)$voucher_id . "' WHERE order_voucher_id = '" . (int)$order_voucher['order_voucher_id'] . "'");
+			}			
 
 			// Send out any gift voucher mails
 			if ($this->config->get('config_complete_status_id') == $order_status_id) {
@@ -123,7 +109,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 			}
 
 			// Order Totals			
-			$order_total_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int) $order_id . "' ORDER BY sort_order ASC");
+			$order_total_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "order_total` WHERE order_id = '" . (int)$order_id . "' ORDER BY sort_order ASC");
 			//print_r($order_total_query);exit;
 			foreach ($order_total_query->rows as $order_total) {
 				$this->load->model('total/' . $order_total['code']);
@@ -138,10 +124,10 @@ class Cointopay extends \Opencart\System\Engine\Model
 			$language->load($order_info['language_filename']);
 			$language->load('mail/order');
 
-			$order_status_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int) $order_status_id . "' AND language_id = '" . (int) $order_info['language_id'] . "'");
+			$order_status_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_status WHERE order_status_id = '" . (int)$order_status_id . "' AND language_id = '" . (int)$order_info['language_id'] . "'");
 
 			if ($order_status_query->num_rows) {
-				$order_status = $order_status_query->row['name'];
+				$order_status = $order_status_query->row['name'];	
 			} else {
 				$order_status = '';
 			}
@@ -160,7 +146,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 			$template->data['text_instruction'] = $language->get('text_new_instruction');
 			$template->data['text_order_id'] = $language->get('text_new_order_id');
 			$template->data['text_date_added'] = $language->get('text_new_date_added');
-			$template->data['text_payment_method'] = $language->get('text_new_payment_method');
+			$template->data['text_payment_method'] = $language->get('text_new_payment_method');	
 			$template->data['text_shipping_method'] = $language->get('text_new_shipping_method');
 			$template->data['text_email'] = $language->get('text_new_email');
 			$template->data['text_telephone'] = $language->get('text_new_telephone');
@@ -175,7 +161,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 			$template->data['text_footer'] = $language->get('text_new_footer');
 			$template->data['text_powered'] = $language->get('text_new_powered');
 
-			$template->data['logo'] = $this->config->get('config_url') . 'image/' . $this->config->get('config_logo');
+			$template->data['logo'] = $this->config->get('config_url') . 'image/' . $this->config->get('config_logo');		
 			$template->data['store_name'] = $order_info['store_name'];
 			$template->data['store_url'] = $order_info['store_url'];
 			$template->data['customer_id'] = $order_info['customer_id'];
@@ -188,7 +174,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 			}
 
 			$template->data['order_id'] = $order_id;
-			$template->data['date_added'] = date($language->get('date_format_short'), strtotime($order_info['date_added']));
+			$template->data['date_added'] = date($language->get('date_format_short'), strtotime($order_info['date_added']));    	
 			$template->data['payment_method'] = $order_info['payment_method'];
 			$template->data['shipping_method'] = $order_info['shipping_method'];
 			$template->data['email'] = $order_info['email'];
@@ -222,18 +208,18 @@ class Cointopay extends \Opencart\System\Engine\Model
 
 			$replace = array(
 				'firstname' => $order_info['payment_firstname'],
-				'lastname' => $order_info['payment_lastname'],
-				'company' => $order_info['payment_company'],
+				'lastname'  => $order_info['payment_lastname'],
+				'company'   => $order_info['payment_company'],
 				'address_1' => $order_info['payment_address_1'],
 				'address_2' => $order_info['payment_address_2'],
-				'city' => $order_info['payment_city'],
-				'postcode' => $order_info['payment_postcode'],
-				'zone' => $order_info['payment_zone'],
+				'city'      => $order_info['payment_city'],
+				'postcode'  => $order_info['payment_postcode'],
+				'zone'      => $order_info['payment_zone'],
 				'zone_code' => $order_info['payment_zone_code'],
-				'country' => $order_info['payment_country']
+				'country'   => $order_info['payment_country']  
 			);
 
-			$template->data['payment_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
+			$template->data['payment_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));						
 
 			if ($order_info['shipping_address_format']) {
 				$format = $order_info['shipping_address_format'];
@@ -256,15 +242,15 @@ class Cointopay extends \Opencart\System\Engine\Model
 
 			$replace = array(
 				'firstname' => $order_info['shipping_firstname'],
-				'lastname' => $order_info['shipping_lastname'],
-				'company' => $order_info['shipping_company'],
+				'lastname'  => $order_info['shipping_lastname'],
+				'company'   => $order_info['shipping_company'],
 				'address_1' => $order_info['shipping_address_1'],
 				'address_2' => $order_info['shipping_address_2'],
-				'city' => $order_info['shipping_city'],
-				'postcode' => $order_info['shipping_postcode'],
-				'zone' => $order_info['shipping_zone'],
+				'city'      => $order_info['shipping_city'],
+				'postcode'  => $order_info['shipping_postcode'],
+				'zone'      => $order_info['shipping_zone'],
 				'zone_code' => $order_info['shipping_zone_code'],
-				'country' => $order_info['shipping_country']
+				'country'   => $order_info['shipping_country']  
 			);
 
 			$template->data['shipping_address'] = str_replace(array("\r\n", "\r", "\n"), '<br />', preg_replace(array("/\s\s+/", "/\r\r+/", "/\n\n+/"), '<br />', trim(str_replace($find, $replace, $format))));
@@ -275,7 +261,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 			foreach ($order_product_query->rows as $product) {
 				$option_data = array();
 
-				$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int) $order_id . "' AND order_product_id = '" . (int) $product['order_product_id'] . "'");
+				$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id = '" . (int)$product['order_product_id'] . "'");
 
 				foreach ($order_option_query->rows as $option) {
 					if ($option['type'] != 'file') {
@@ -285,18 +271,18 @@ class Cointopay extends \Opencart\System\Engine\Model
 					}
 
 					$option_data[] = array(
-						'name' => $option['name'],
+						'name'  => $option['name'],
 						'value' => (utf8_strlen($value) > 20 ? utf8_substr($value, 0, 20) . '..' : $value)
-					);
+					);					
 				}
 
 				$template->data['products'][] = array(
-					'name' => $product['name'],
-					'model' => $product['model'],
-					'option' => $option_data,
+					'name'     => $product['name'],
+					'model'    => $product['model'],
+					'option'   => $option_data,
 					'quantity' => $product['quantity'],
-					'price' => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
-					'total' => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])
+					'price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),
+					'total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])
 				);
 			}
 
@@ -306,7 +292,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 			foreach ($order_voucher_query->rows as $voucher) {
 				$template->data['vouchers'][] = array(
 					'description' => $voucher['description'],
-					'amount' => $this->currency->format($voucher['amount'], $order_info['currency_code'], $order_info['currency_value']),
+					'amount'      => $this->currency->format($voucher['amount'], $order_info['currency_code'], $order_info['currency_value']),
 				);
 			}
 
@@ -338,7 +324,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 				foreach ($order_product_query->rows as $product) {
 					$text .= $product['quantity'] . 'x ' . $product['name'] . ' (' . $product['model'] . ') ' . html_entity_decode($this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8') . "\n";
 
-					$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int) $order_id . "' AND order_product_id = '" . $product['order_product_id'] . "'");
+					$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id = '" . $product['order_product_id'] . "'");
 
 					foreach ($order_option_query->rows as $option) {
 						$text .= chr(9) . '-' . $option['name'] . ' ' . (utf8_strlen($option['value']) > 20 ? utf8_substr($option['value'], 0, 20) . '..' : $option['value']) . "\n";
@@ -399,7 +385,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 				$subject = sprintf($language->get('text_new_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'), $order_id);
 
 				// Text 
-				$text = $language->get('text_new_received') . "\n\n";
+				$text  = $language->get('text_new_received') . "\n\n";
 				$text .= $language->get('text_new_order_id') . ' ' . $order_id . "\n";
 				$text .= $language->get('text_new_date_added') . ' ' . date($language->get('date_format_short'), strtotime($order_info['date_added'])) . "\n";
 				$text .= $language->get('text_new_order_status') . ' ' . $order_status . "\n\n";
@@ -408,7 +394,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 				foreach ($order_product_query->rows as $product) {
 					$text .= $product['quantity'] . 'x ' . $product['name'] . ' (' . $product['model'] . ') ' . html_entity_decode($this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']), ENT_NOQUOTES, 'UTF-8') . "\n";
 
-					$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int) $order_id . "' AND order_product_id = '" . $product['order_product_id'] . "'");
+					$order_option_query = $this->db->query("SELECT * FROM " . DB_PREFIX . "order_option WHERE order_id = '" . (int)$order_id . "' AND order_product_id = '" . $product['order_product_id'] . "'");
 
 					foreach ($order_option_query->rows as $option) {
 						if ($option['type'] != 'file') {
@@ -431,7 +417,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 
 				foreach ($order_total_query->rows as $total) {
 					$text .= $total['title'] . ': ' . html_entity_decode($total['text'], ENT_NOQUOTES, 'UTF-8') . "\n";
-				}
+				}			
 
 				$text .= "\n";
 
@@ -440,7 +426,7 @@ class Cointopay extends \Opencart\System\Engine\Model
 					$text .= $order_info['comment'] . "\n\n";
 				}
 
-				$mail = new Mail();
+				$mail = new Mail(); 
 				$mail->protocol = $this->config->get('config_mail_protocol');
 				$mail->parameter = $this->config->get('config_mail_parameter');
 				$mail->hostname = $this->config->get('config_smtp_host');
@@ -463,8 +449,8 @@ class Cointopay extends \Opencart\System\Engine\Model
 						$mail->setTo($email);
 						$mail->send();
 					}
-				}
-			}
+				}				
+			}		
 		}
 	}
 }

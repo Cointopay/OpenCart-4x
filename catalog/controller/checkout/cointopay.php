@@ -1,6 +1,5 @@
 <?php
-namespace Opencart\Catalog\Controller\Extension\Cointopay\Checkout;
-class Cointopay extends \Opencart\System\Engine\Controller {
+class ControllerCheckoutCointopay extends Controller {
 	public function index($id = '') {
 		$this->load->language('checkout/success');
 
