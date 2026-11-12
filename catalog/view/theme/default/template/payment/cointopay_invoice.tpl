@@ -6,8 +6,10 @@
             <div class="warning"><?php echo $error;?></div>
         <?php }else{ ?>
             <legend style="width: auto;"><h2 style="font-weight: bold;"><?php echo $text_title;?></h2></legend>
+            <h4 style="font-weight: bold;  background-color: #446bb3; border-radius: 6px; color: #fff; font-family: inherit; font-size: 16px; font-weight: bold; padding: 8px;  /*background:#f1f1f1; padding:5px;*/"><?php echo $text_title;?></h4>
             <div class="login-content">
                 <div style="width: 50%; float:left;" class="left">
+
                     <table class="form">
                         <tbody>
                             <tr style="height: 50px;">
@@ -52,7 +54,7 @@
                         <tbody>
                             <tr>
                                 <td style="width: 200px;"><?php echo $text_pay_with_other;?></td>
-                                <td><button style="box-shadow: 0 16px 7px -7px #276873;background-color:#446bb3;border-radius:8px;color:#ffffff;font-size:20px;  padding:4px 11px;text-decoration:none;font-weight:bold;"><a href="<?php echo $RedirectURL;?>" style="color:#fff" ><?php echo $text_clickhere;?></a></button></td>
+				<td><a href="<?php echo $RedirectURL;?>"><?php echo $text_clickhere;?></a></td>
                             </tr>
                         </tbody>
                     </table>

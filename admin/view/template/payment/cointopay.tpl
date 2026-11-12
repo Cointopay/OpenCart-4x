@@ -25,7 +25,7 @@
                 function getMerchantCoin(merchantId)
                 {
                     $.ajax({
-                        url:'index.php?route=extension/payment/cointopay/getMerchantCoinsByAjax&token=<?php echo $token?>',
+                        url:'index.php?route=payment/cointopay/getMerchantCoinsByAjax&token=<?php echo $token?>',
                         type:'post',
                         data:{merchantId:merchantId},
                         success:function(res){
