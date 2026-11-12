@@ -1,20 +1,18 @@
-# COINTOPAY PAYMENT METHOD FOR OPENCART 4.0.X
+# COINTOPAY PAYMENT METHOD FOR OPENCART 2.3
 
 SOURCE CODE FOR COINTOPAY OPENCART PLUGIN LOCATED HERE: https://www.opencart.com/index.php?route=marketplace/extension/info&extension_id=37980&filter_download_id=36&sort=date_added
 
-Please follow the Opencart 4.0.x Cointopay Plugin install instructions mentioned here: https://docs.google.com/document/d/1NB8xxm8yXLt2j1oMJSjmA4sAk4cJBayGOksMRC2xPKg/edit?usp=sharing
+## *********** HOW TO INSTALL IN OPENCART 2.3 ***********
 
-## *********** HOW TO INSTALL IN OPENCART 4 ***********
+1:- Download as zip file
 
-1:- Download <a download href="https://github.com/Cointopay/OpenCart-4x/blob/main/cointopay.ocmod.zip">cointopay.ocmod.zip</a> file
-
-2:- Palace this zip file in root directory of your Opencart 4 project
+2:- Palace this zip file in root directory of your Opencart 2.3 project
 
 3:- Right click on the zip file and click on Extract Here option.
 
    Installation done!!
    
-   #### *************** OR ***************
+   #### *********** OR ***********
    
  1:- Download as zip file
  
@@ -26,7 +24,7 @@ Please follow the Opencart 4.0.x Cointopay Plugin install instructions mentioned
  
 		Done!!
    
-  ## ******************************** CONFIGURATION ********************************
+  ## *********** CONFIGURATION ***********
 
  1:- Go to admin dashboard
  
